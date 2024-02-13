@@ -7,7 +7,7 @@ output:
   word_document:
     toc: yes
     number_sections: true
-date: 
+date: 02-24-2024
 author: STT 461
 ---
 
