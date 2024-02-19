@@ -10,6 +10,9 @@ output:
 date: 02-24-2024
 author: STT 461
 ---
+```{r, eval=FALSE}
+library(dplyr)
+```
 
 
 # Task 1 - Data science jobs and salaries 2020-2022
@@ -46,28 +49,111 @@ To load the ds_salaries data:
 
 ```{r, eval = FALSE}
 getwd()
-
 ```
 
 2. Download and save the file ds_salaries.csv from D2L in your current working directory
 
 3. Read the data with read.csv()
-```{r}
+```{r read-data}
 ds_salaries <- read.csv('ds_salaries.csv')[-1]
 ```
 
 ## Assume that this dataset is representative of the population of employees in the data science field. Use simulations and the variables: *experience_level*, *salary_in_usd* and  *company_location*, to estimate the probability of finding at least 8 employees with salary greater or equal to 100,000 USD in a group of 10 data entry level employees of companies in the US. Notice that companies located in the US have company_location = US.
 
+```{r Task1-Q1}
+set.seed(20)
+
+# Filter dataset by company location in US and experience level of Entry
+entries_us <- ds_salaries %>%
+  filter(company_location == "US" & experience_level == "EN")
+
+# Store salaries greater than or equal to 100,000
+salaries_above_100K <- entries_us$salary_in_usd >= 100000
+
+# Simulate 10,000 times to estimate the probability
+sims <- replicate(10000, sum(sample(salaries_above_100K, 10, replace = TRUE)) >= 8)
+mean(sims)
+```
+
+The estimated probability of finding at least 8 Entry Level employees with a salary greater than or equal to 100,000 USD in a group of 10 is 0.0111.
 
 ## Plot the histrogram of *salary_in_usd* for the year 2022 for employees in the general data science field with full time employment. Observe that the salary data for this group are skewed. In those cases, the median is a better estimate of the center of the data than the mean. Provide a 90% confidence interval for the median *salary_in_usd* of the aforementioned group of employees, to estimate the center of their salary.
 
+```{r Task1-Q2}
+set.seed(20)
+
+# Filter by full time and the year 2022
+entries_2022 <- ds_salaries %>%
+  filter(employment_type == "FT" & work_year == 2022)
+
+# Plot the histogram
+hist(entries_2022$salary_in_usd, main = "Histogram of Salaries in 2022 for Full Time Employee", xlab = "Salary in USD", breaks = 25)
+
+# 90% confidence interval
+# Simulate 10000
+median_sims <- replicate(10000, median(sample(entries_2022$salary_in_usd, replace = TRUE)))
+
+# Get the confidence interval
+conf_interval <- quantile(median_sims, probs = c(0.05, 0.95))
+
+# Print out the confidence interval
+conf_interval
+```
+
+We can be 90% confident that the true median of salary lies between 115,821.20 USD and 129,000.00 USD.
 
 ## In 2021, were employees with senior experience  paid better than those with  mid/intermediate level experience? Conduct a test with significance level of $\alpha = 0.01$ to answer the above question.
+
+```{r Task1-Q3}
+set.seed(20)
+
+alpha = 0.01
+
+# Filter for proper data sets
+senior_exp <- ds_salaries %>%
+  filter(experience_level == "SE" & work_year == 2021)
+
+mid.int_exp <- ds_salaries %>%
+  filter(experience_level == "MI" & work_year == 2021)
+
+# Get the medians of salary of both experience levels
+median_senior_sal <- median(senior_exp$salary_in_usd)
+median_mid.int_sal <- median(mid.int_exp$salary_in_usd)
+
+# Calculate the observed difference in median salary
+obsv_diff <- median_senior_sal - median_mid.int_sal
+
+# Combine the data sets
+combined <- c(senior_exp$salary_in_usd, mid.int_exp$salary_in_usd)
+
+sims <- replicate(10000, {
+  # Get a sample of values from the combined data sets
+  samples <- sample(combined)
+  
+  # Split the samples
+  seniors <- samples[1:length(senior_exp)]
+  mid.int <- samples[(length(senior_exp) + 1):(length(senior_exp) + length(mid.int_exp))]
+  
+  # Find difference in medians
+  median(seniors) - median(mid.int)
+})
+
+# Calculate the p-value
+p_value <- mean(abs(sims) >= abs(obsv_diff))
+p_value
+```
 
 
 
 ## A friend of yours is interested in working for the first time in the data science field by finding a data entry position. Your friend can work either in Germany or in the US. Using the salary data for 2021, make a suggestion to your friend on which country has companies with better salary opportunities for data entry employees by conducting a test with significance level $\alpha = 0.01$. Notice that companies located in Germany have company_location = DE.
 
+```{r Task1-Q4}
+us_salaries <- ds_salaries %>%
+  filter(experience_level == "EN" & company_location == "US" & work_year == 2022)
+
+de_salaries <- ds_salaries %>%
+  filter(experience_level == "EN" & company_location == "DE" & work_year == 2022)
+```
 
 
 # Task 2 - Robustness of the parametric t confidence interval for a mean and the t-test for a mean.
