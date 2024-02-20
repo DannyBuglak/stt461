@@ -123,7 +123,7 @@ median_mid.int_sal <- median(mid.int_exp$salary_in_usd)
 # Calculate the observed difference in median salary
 obsv_diff <- median_senior_sal - median_mid.int_sal
 
-# Boostrap sampling
+# Bootstrap sampling
 bootstrap <- replicate(10000, {
   seniors <- sample(senior_exp$salary_in_usd, length(senior_exp), replace=TRUE)
   mid.int <- sample(mid.int_exp$salary_in_usd, length(mid.int_exp), replace=TRUE)
