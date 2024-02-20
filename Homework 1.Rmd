@@ -123,27 +123,22 @@ median_mid.int_sal <- median(mid.int_exp$salary_in_usd)
 # Calculate the observed difference in median salary
 obsv_diff <- median_senior_sal - median_mid.int_sal
 
-# Combine the data sets
-combined <- c(senior_exp$salary_in_usd, mid.int_exp$salary_in_usd)
-
-sims <- replicate(10000, {
-  # Get a sample of values from the combined data sets
-  samples <- sample(combined)
+# Boostrap sampling
+bootstrap <- replicate(10000, {
+  seniors <- sample(senior_exp$salary_in_usd, length(senior_exp), replace=TRUE)
+  mid.int <- sample(mid.int_exp$salary_in_usd, length(mid.int_exp), replace=TRUE)
   
-  # Split the samples
-  seniors <- samples[1:length(senior_exp)]
-  mid.int <- samples[(length(senior_exp) + 1):(length(senior_exp) + length(mid.int_exp))]
-  
-  # Find difference in medians
   median(seniors) - median(mid.int)
 })
 
 # Calculate the p-value
-p_value <- mean(abs(sims) >= abs(obsv_diff))
+p_value <- mean(abs(bootstrap) >= abs(obsv_diff))
+
 p_value
 ```
 
-
+The calculated p-value is larger than alpha. This leads us to reject the null hypothesis, telling us that there is
+not a statistically significant difference between the median salaries of senior and mid/intermediate level employees.
 
 ## A friend of yours is interested in working for the first time in the data science field by finding a data entry position. Your friend can work either in Germany or in the US. Using the salary data for 2021, make a suggestion to your friend on which country has companies with better salary opportunities for data entry employees by conducting a test with significance level $\alpha = 0.01$. Notice that companies located in Germany have company_location = DE.
 
@@ -152,7 +147,10 @@ us_salaries <- ds_salaries %>%
   filter(experience_level == "EN" & company_location == "US" & work_year == 2022)
 
 de_salaries <- ds_salaries %>%
-  filter(experience_level == "EN" & company_location == "DE" & work_year == 2022)
+  filter(company_location == "DE" & work_year == 2022)
+
+us_salaries
+de_salaries
 ```
 
 
@@ -164,10 +162,87 @@ In this task you will use simulations to demonstrate how Type I error and confid
 
 ## Estimate the type I error rate in a t-test of Ho : $\mu=1$ versus Ha : $\mu \neq 1$ when the underlying population is exponential with rate 1. Use a sample of size n = 20 and test at the $\alpha = 0.05$ significance level. Did the skewness of the sample data affected the type I error rate (hint: compare the estimated type I error rate with $\alpha$.)
 
+```{r Task2-Q1}
+set.seed(20)
+
+n <- 20
+alpha <- 0.05
+
+# Perform simulations
+errors_sim <- replicate(10000, {
+  sample <- rexp(n, rate = 1)
+  test <- t.test(sample, mu = 1)
+  test$p.value < alpha     # Test if p-value from t.test is less than alpha
+})
+
+mean(errors_sim)
+```
+
+The mean p-value from the simulations is greater than alpha. This suggests that the skewness
+affects the test, leading to more Type I errors where the null hypothesis is incorrectly rejected.
+
 ## Choose 10 random values of X having an exponential distribution with rate 1/3. Use t.test to compute the 95% confidence interval for the mean. Is the true mean, 3, in your confidence interval?
+
+```{r Task2-Q2}
+set.seed(20)
+
+n <- 10
+
+sample <- rexp(n, rate = 1/3)
+
+conf_int <- t.test(sample, conf.level = 0.95)$conf.int
+conf_int
+
+```
+
+The 95% confidence interval is (-0.17, 7.97). The true mean of 3 is within the confidence interval.
 
 ## Check if the assumptions for the appropriate t.test are met. Replicate the experiment in part (2.2) 10,000 times and compute the percentage of times that the population mean 3 was included in the confidence interval. Explain why this number is not 95%.
 
+```{r Task2-Q3}
+set.seed(20)
+
+n <- 10
+
+ci_sims <- replicate(10000, {
+  sample <- rexp(n, rate = 1/3)
+  conf_int <- t.test(sample, conf.level = 0.95)$conf.int
+  
+  # Test if 3 is within the confidence interval
+  conf_int[1] <= 3 && 3 <= conf_int[2]
+})
+
+# Calculate the percentage from the simulations
+mean(ci_sims) * 100
+```
+
+The result is 89.81%, meaning that the true mean of 3 is only within the bounds 
+of the 95% confidence interval 89.81% of the time instead of 95%. This is because
+due to the small value of n, 10, and the population being exponential and heavily 
+skewed, the population cannot follow the Central Limit Theorem. The t.test expects
+a normal distribution which the sample data is not. 
+
 ## Repeat part (2.3) using 100 values of X to make each confidence interval. What percentage of times did the confidence interval contain the population mean? Why is it closer to 95%?
 
+```{r Task2-Q4}
+set.seed(20)
 
+n <- 100
+
+ci_sims <- replicate(10000, {
+  sample <- rexp(n, rate = 1/3)
+  conf_int <- t.test(sample, conf.level = 0.95)$conf.int
+  
+  # Test if 3 is within the confidence interval
+  conf_int[1] <= 3 && 3 <= conf_int[2]
+})
+
+# Calculate the percentage from the simulations
+mean(ci_sims) * 100
+```
+
+The percentage of times that the confidence interval contained the true population
+mean in this test is 94.28%, which is much closer to 95%. This is because, with a 
+larger sample size, the distribution becomes slightly closer to an approximately normal
+distribution due to the Central Limit Theorem. This slightly improves the t.test results since
+t.test assumes an approximately normal distribution.
