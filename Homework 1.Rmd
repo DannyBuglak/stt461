@@ -143,15 +143,38 @@ not a statistically significant difference between the median salaries of senior
 ## A friend of yours is interested in working for the first time in the data science field by finding a data entry position. Your friend can work either in Germany or in the US. Using the salary data for 2021, make a suggestion to your friend on which country has companies with better salary opportunities for data entry employees by conducting a test with significance level $\alpha = 0.01$. Notice that companies located in Germany have company_location = DE.
 
 ```{r Task1-Q4}
+set.seed(20)
+
 us_salaries <- ds_salaries %>%
-  filter(experience_level == "EN" & company_location == "US" & work_year == 2022)
+  filter(experience_level == "EN" & company_location == "US" & work_year == 2021)
 
 de_salaries <- ds_salaries %>%
-  filter(company_location == "DE" & work_year == 2022)
+  filter(experience_level == "EN" & company_location == "DE" & work_year == 2021)
 
-us_salaries
-de_salaries
+median_us_salary <- median(us_salaries$salary_in_usd)
+median_de_salary <- median(de_salaries$salary_in_usd)
+
+# Observed difference
+obsv_diff <- median_us_salary - median_de_salary
+
+# Bootstrap sampling
+bootstrap <- replicate(10000, {
+  us_sal <- sample(us_salaries$salary_in_usd, length(us_salaries), replace=TRUE)
+  de_sal <- sample(de_salaries$salary_in_usd, length(de_salaries), replace=TRUE)
+  
+  median(us_sal) - median(de_sal)
+})
+
+# Calculate the p-value
+p_value <- mean(abs(bootstrap) >= abs(obsv_diff))
+
+p_value
 ```
+
+Due to the high p-value calculated after performing bootstrap sampling and comparing
+the medians of the salaries from the US and Germany, I would suggest to my friend that
+there is not a large statistical significance between salaries of the two countries. So,
+they could choose where they would want to go.
 
 
 # Task 2 - Robustness of the parametric t confidence interval for a mean and the t-test for a mean.
