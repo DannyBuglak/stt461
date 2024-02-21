@@ -10,7 +10,7 @@ output:
 date: 02-24-2024
 author: STT 461
 ---
-```{r, eval=FALSE}
+```{r}
 library(dplyr)
 ```
 
