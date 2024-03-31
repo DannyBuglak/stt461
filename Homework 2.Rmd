@@ -41,7 +41,7 @@ The _fish_ data set has fish measurements from Laengelmavesi Lake, near Tampere 
 
 ## Load the fish data set remove the _obs_ variable and remove the rows of the data set for which there is a missing value for the variable sex.  Also remove fish of species=2, because there will be only one observation there.
 
-```{r}
+```{r data-prep}
 fish  <- fosdata::fish [,-1]
 id <- which(is.na(fish$sex))
 fish <- fish[-id,]
@@ -51,21 +51,54 @@ fish <- fish[-species_2,]
 
 ## Convert the variables _sex_ and _species_ to factor variables
 
+```{r factor-variables}
+fish$sex <- factor(fish$sex)
+fish$species <- factor(fish$species)
+```
+
 
 ## We want to build a linear regression model that will predict the weight of fish from other variables, as an alterantive of measuring the weight of fish with weight scales. Notice that length1, length2, width_percent and height_percent are all related to length3. Fit the linear regression model weight~species+sex+length3 and name it model1. Using the estimated coefficients write the equation of the linear regression line.
 
+```{r lm}
+model1 <- lm(weight ~ species + sex + length3, data = fish)
+model1
+```
 
+$model1 = -995.48 + 73.92*species3 + 156.64*species4 + 440.71*species5 - 356.37*species6 + 75.96*species7 + 26.1*sex1 + 42.70*length3$
 
 ## In order to do inference for the coefficients of the linear regression model we need the errors of the model to be independent and normally distributed with mean zero and constant variance. Plot the residual plot and the qq plot of the residuals and comment on wether the conditions for the model errors are met.
 
+```{r model1-residual}
+plot(residuals(model1) ~ fitted(model1))
+abline(h = 0, col = 'red')
+```
+
+```{r model1-qq}
+qqnorm(residuals(model1))
+qqline(residuals(model1))
+```
+
 
 ## Provide an interpretation for the coefficient of determination $R^2$ of model1.
+
+```{r model1-cod}
+summary(model1)$r.squared
+```
+
 
 ## Based on the summary of model1 provide the test statistic and the p-value when testing  Ho: $\beta_{length3} =0$ vs Ha: $\beta_{length3}\neq 0$. Using the results of this test can we conclude that there is a linear relationship between length3 and weight?
 
 ## Similarly, based on the summary of model1 provide the test statistic and the p-value when testing  Ho: $\beta_{sex} =0$ vs Ha: $\beta_{sex}\neq 0$. Using the results of this test should we remove the variable sex from model1?
 
 ## Make the scatterplot of weight vs length3 and color it by the variable species. Also overlay the linear regrssion lines of weight vs length3 for each of the species. You will observe that that different species have a different relationship between their weight and lenght3. Hint: This type of scatterplot can be found in inclass assignment 25.
+
+```{r model1-scatter}
+library(ggplot2)
+ggplot(fish, aes(x = weight, y = length3, color = species)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE)
+```
+
 
 ## Based on the previous scatterplot there might be an interaction between lenght3 and species. Fit the model that will predict weight from species, length3 and the interaction term between length3 and species. Call this model, model2.
 
