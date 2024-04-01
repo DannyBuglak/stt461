@@ -132,8 +132,12 @@ model2 <- lm(weight ~ species * length3, data = fish)
 anova(model1, model2)
 ```
 
+Ho: There is no improvement in the model by adding the interaction term.
+Ha: There is a signficant improvement in the model by adding the interaction term.
+
+**Need to make conclusion**
 
 ## Using model2 provide a prediction for the weight of fish of species 5 (Smelt) with legth3 (from the nose to the end of the tail) equal to 14cm. In addition provide a prediction interval for the weight of fish with those characteristics. Use confidence level equal to 0.95.
 
-
+**ANSWER THIS**
 
