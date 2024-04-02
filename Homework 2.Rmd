@@ -122,22 +122,27 @@ ggplot(fish, aes(x = weight, y = length3, color = species)) +
 
 ## Based on the previous scatterplot there might be an interaction between lenght3 and species. Fit the model that will predict weight from species, length3 and the interaction term between length3 and species. Call this model, model2.
 
-```{r}
+```{r model2-creation}
 model2 <- lm(weight ~ species * length3, data = fish)
 ```
 
 ## Using the ANOVA test, test if the interaction term should be included in the model2 or not. Write the null and alternative hypothesis conduct the test and make a conclusion.
 
-```{r}
+```{r model2-anova}
 anova(model1, model2)
 ```
 
 Ho: There is no improvement in the model by adding the interaction term.
-Ha: There is a signficant improvement in the model by adding the interaction term.
+Ha: There is a significant improvement in the model by adding the interaction term.
 
-**Need to make conclusion**
+The output from the anova function comparing the two models indicates that model2 is better at predicting the weight than model1 is. This can be seen because the p-value calculated is incredibly small and is less than 0.05. This can lead us to reject the null hypothesis. The interaction term found in model2 significantly improves the model.
 
 ## Using model2 provide a prediction for the weight of fish of species 5 (Smelt) with legth3 (from the nose to the end of the tail) equal to 14cm. In addition provide a prediction interval for the weight of fish with those characteristics. Use confidence level equal to 0.95.
 
-**ANSWER THIS**
+```{r model2-prediction}
+testData <- data.frame(species = factor(5, levels = levels(fish$species)), length3 = 14)
 
+predict(model2, newdata = testData, interval = "prediction", level = 0.95)
+```
+
+The predicted value for the weight of a fish of species 5 with length3 14cm is approximately 13.826. The lower bound for the 95% confidence interval is -118.80 and the upper bound is 146.45.
