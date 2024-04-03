@@ -52,8 +52,8 @@ fish <- fish[-species_2,]
 ## Convert the variables _sex_ and _species_ to factor variables
 
 ```{r factor-variables}
-fish$sex <- factor(fish$sex)
-fish$species <- factor(fish$species)
+fish$sex <- as.factor(fish$sex)
+fish$species <- as.factor(fish$species)
 ```
 
 
@@ -80,7 +80,7 @@ qqnorm(residuals(model1))
 qqline(residuals(model1))
 ```
 
-The points generate from qqnorm are nearly on the line generated from qqline. Ideally, all points would be lying on the qqline. This suggests that the residuals are approximately normally distributed. The beginning and end of the plot have points that deviate from the line more than others, suggesting that there are some residuals that are outliers.
+The points generated from qqnorm are nearly on the line generated from qqline. Ideally, all points would be lying on the qqline. This suggests that the residuals are approximately normally distributed. The beginning and end of the plot have points that deviate from the line more than others, suggesting that there are some residuals that are outliers.
 
 ## Provide an interpretation for the coefficient of determination $R^2$ of model1.
 
